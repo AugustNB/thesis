@@ -1,20 +1,20 @@
-#convert fast5 files from sequencing to pod5 files
+**convert fast5 files from sequencing to pod5 files
 ```bash
 pod5 convert fast5 file.fast5 --output OUTDIR
 ```
 
-#basecall pod5 files
+**basecall pod5 files
 ```bash
 dorado basecaller --modified-bases 5mCG_5hmCG --no-trim \
 hac@v4.1.0 output.pod5 > basecalled.bam
 ```
 
-#convert unaligned bams to fastq and filter out reads shorter than 80 bases
+**convert unaligned bams to fastq and filter out reads shorter than 80 bases
 ```bash
 samtools fastq -T'*' basecalled.bam > basecalled.fastq
 ```
 
-#get qc statistics of non-filtered basecalled reads
+**get qc statistics of non-filtered basecalled reads
 ```r
 nanoQC basecalled.fastq -o OUTDIR
 ```
@@ -23,12 +23,12 @@ NanoPlot --fastq basecalled.fastq -o OUTDIR \
 --format png --plots dot --loglength
 ```
 
-#convert unaligned bams to fastq and filter out reads shorter than 80 bases
+**convert unaligned bams to fastq and filter out reads shorter than 80 bases
 ```bash
 seqtk seq -L 80 basecalled.fastq > basecalled_minlength80.fastq
 ```
 
-#perform demultiplexing with either developed workflow or dorado
+**perform demultiplexing with either developed workflow or dorado
 ```bash
 /workflow_demultiplex
 
@@ -43,7 +43,7 @@ dorado demux \
 basecalled_minlength80.fastq.gz
 ```
 
-#trimming from inner flanks and barcode with cutadapt
+**trimming from inner flanks and barcode with cutadapt
 ```bash
 cutadapt -a ACAGACGACTACAAACGGAATCGACAGCACCT...TTAACCTTAGCAATTCGATTCCGTTTGTAGTCGTCTGT -O 10 -e 0.3 -o trimmed_reads/barcode02.fastq -j 0 --buffer-size=16000000 classified_reads/barcode02.fastq && \
 cutadapt -a CCTGGTAACTGGGACACAAGACTCCAGCACCT...TTAACCTTAGCAATGAGTCTTGTGTCCCAGTTACCAGG -O 10 -e 0.3 -o trimmed_reads/barcode03.fastq -j 0 --buffer-size=16000000 classified_reads/barcode03.fastq && \
@@ -56,12 +56,12 @@ cutadapt -a TCCATTCCCTCCGATAGATGAAACCAGCACCT...TTAACCTTAGCAATGTTTCATCTATCGGAGGGA
 
 ```
 
-#run alignment workflow
+**run alignment workflow
 ```bash
 /workflow_alignment
 ```
 
-#run methylaton workflow
+**run methylaton workflow
 ```bash
 /workflow_methylation
 # calculate methylation statistics per sample
