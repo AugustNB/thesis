@@ -13,3 +13,5 @@ alignment_workflow:
 
 methylation_workflow:
   - Small seperate snakemake workflow for perfoming methylation analysis of each sample.
+
+Pipeline applied to each sequencing run/sample is available in the bash_code.md file
