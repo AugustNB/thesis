@@ -1,2 +1,2 @@
-# thesis
+# Thesis
 Repository for KU thesis
