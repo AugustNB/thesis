@@ -1,5 +1,5 @@
 # Thesis
-Repository for KU thesis
+Repository for August Bodilsen KU thesis
 
 Code for plotting and performing statistical tests on derived length and methylation data is available in the scripts folder.
 
