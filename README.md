@@ -3,6 +3,8 @@ Repository for KU thesis
 
 Code for plotting and performing statistical tests on derived length and methylation data is available in the scripts folder.
 
+Pipeline applied to each sequencing run/sample is available in the bash_code.md file
+
 Snakemake workflows are available in the snakemake_workflows folders.
 
 demultiplex_workflow:
@@ -13,5 +15,3 @@ alignment_workflow:
 
 methylation_workflow:
   - Small seperate snakemake workflow for perfoming methylation analysis of each sample.
-
-Pipeline applied to each sequencing run/sample is available in the bash_code.md file
