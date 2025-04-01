@@ -1,0 +1,46 @@
+configfile: "config/config.yaml"
+
+data_path = config["path_to_data"]
+
+rule all:
+    input:
+        expand("{path}/methylation_data/{sample}_methyl_stats.tsv",
+        path=config["path_to_data"],
+        sample=config["samples"])
+
+# get bedmethyl file of methylations
+rule modkit_pileup:
+    input:
+        "{path}/mapped_reads/{sample}.bam"
+        # os.path.join(data_path, "mapped_reads/{sample}.bam")
+    output:
+        "{path}/methylation_data/{sample}_methyl.bed.gz"
+    conda:
+        "envs/methylation_env.yaml"
+    shell:'''
+        modkit pileup --no-filtering {input} - | bgzip -c > {output}'''
+
+# index bedmethyl file
+rule index_bedmethyl:
+    input:
+        "{path}/methylation_data/{sample}_methyl.bed.gz"
+    output:
+        "{path}/methylation_data/{sample}_methyl.bed.gz.tbi"
+    conda:
+        "envs/methylation_env.yaml"
+    shell:
+        "tabix -p bed {input}"
+
+# look for modifications in region close to TSS
+rule modkit_stats:
+    input:
+        sample="{path}/methylation_data/{sample}_methyl.bed.gz",
+        tabix_index="{path}/methylation_data/{sample}_methyl.bed.gz.tbi",
+        regions=config["regions"]
+    output:
+        "{path}/methylation_data/{sample}_methyl_stats.tsv"
+    conda:
+        "envs/methylation_env.yaml"
+    shell:'''
+        modkit stats {input.sample} --regions {input.regions} -o {output} --mod-codes "h,m"
+        '''

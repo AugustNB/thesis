@@ -1,0 +1,35 @@
+### GENERAL CONFIGURATIONS
+
+# Sequencing runs
+input_fastq: "/data/August/speciale_kode/data/RUN4/basecalled_minlength80.fastq.gz"
+
+save_path: "/data/August/speciale_kode/data/RUN4"
+
+# PREFIX'es used for each {PREFIX}.fasta and {PREFIX}.toml file supplied to cutadapt and dorado/guppy
+
+barcode_locations:
+    - "front"
+    - "frontadap"
+    - "rear"
+    - "double"
+    - "doubleadap"
+
+# names used for barcode sequences in fasta file supplied to cutadapt
+barcode_names: 
+    ["barcode02", "barcode03", "barcode04", "barcode05", 
+    "barcode07", "barcode08", "barcode10", "barcode11", "unknown"]
+
+barcodes_nounclassified:
+    ["barcode02", "barcode03", "barcode04", "barcode05", 
+    "barcode07", "barcode08", "barcode10", "barcode11"]
+
+### CUTADAPT CONFIGURATIONS
+
+# parameters for cutadapt
+error_rate: 0.3
+overlap: 10
+
+### DORADO CONFIGURATIONS
+
+# identifier for .toml file
+scoring_options: 2

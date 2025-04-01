@@ -1,0 +1,122 @@
+configfile: "config/config.yaml"
+
+wildcard_constraints:
+    sample="S\\d{1,2}"
+
+rule all:
+    input:
+        expand("{path}/nanoplots/{sample}/NanoStats.txt",
+        path=config["path_to_data"],
+        sample=config["samples"]),
+        expand("{path}/nanoQC/{sample}/nanoQC.html",
+        path=config["path_to_data"],
+        sample=config["samples"]),
+        expand("{path}/coverage/{sample}_coverage.txt",
+        path=config["path_to_data"],
+        sample=config["samples"]),
+        expand("{path}/per_base_depth/{sample}_depth.txt",
+        path=config["path_to_data"],
+        sample=config["samples"])
+
+def get_samples(wildcards):
+    return config["samples"][wildcards.sample]
+
+## used to select reads within canonical cfDNA length
+# rule filter_bam_on_length:
+#     input:
+#         "/data/August/speciale_kode/data/RUN1/q_filtered_q7/mapped_reads/{sample}.bam"
+#     output:
+#         "{path}/mapped_reads/{sample}.bam"
+#     conda:
+#         "envs/alignment_env.yaml"
+#     shell:
+#         "samtools view -h -e 'length(seq)>=90 && length(seq)<=250' -O BAM {input} | samtools sort -O bam > {output}"
+
+## mask bases with qualities below certain threshold from reads
+# rule filter_on_quality:
+#     input:
+#         get_samples
+#     output:
+#         "{path}/trimmed_reads/{sample}.fastq"
+#     shell:
+#         "seqtk seq -q 7 -n N {input} > {output}"
+
+# get QC statistics with nanoQC
+rule nanoQC:
+    input:
+        get_samples
+    output:
+        "{path}/nanoQC/{sample}/nanoQC.html"
+    params:
+        output_dir="{path}/nanoQC/{sample}"
+    conda:
+        "envs/alignment_env.yaml"
+    shell:
+        "nanoQC -o {params.output_dir} {input}"
+
+
+# align reads to reference with minimap
+rule minimap:
+    input:
+        ref=config["reference"],
+        seq_data=get_samples
+    output:
+        "{path}/mapped_reads/{sample}.bam"
+    conda:
+        "envs/alignment_env.yaml"
+    shell:
+        '''minimap2 -x sr -y -a {input.ref} {input.seq_data} | \
+        samtools sort -O bam > {output}'''
+
+# index bam
+rule index_bam:
+    input:
+        "{path}/mapped_reads/{sample}.bam"
+    output:
+        "{path}/mapped_reads/{sample}.bam.bai"
+    conda:
+        "envs/alignment_env.yaml"
+    shell:
+        "samtools index {input}"
+
+# get coverage statistics
+rule coverage_stats:
+    input:
+        bam="{path}/mapped_reads/{sample}.bam",
+        bai="{path}/mapped_reads/{sample}.bam.bai",
+    output:
+        "{path}/coverage/{sample}_coverage.txt"
+    conda:
+        "envs/alignment_env.yaml"
+    shell:'''
+        samtools coverage {input.bam} > {output}
+        '''
+
+# get depth at each aligned base
+rule samtools_depth:
+    input:
+        bam="{path}/mapped_reads/{sample}.bam",
+        bai="{path}/mapped_reads/{sample}.bam.bai",
+    output:
+        "{path}/per_base_depth/{sample}_depth.txt"
+    conda:
+        "envs/alignment_env.yaml"
+    shell:'''
+        samtools depth {input.bam} > {output}
+        '''
+
+# get summary plots with nanoplots
+rule nanoplot:
+    input:
+        bam="{path}/mapped_reads/{sample}.bam",
+        bai="{path}/mapped_reads/{sample}.bam.bai",
+    output:
+        "{path}/nanoplots/{sample}/NanoStats.txt"
+    params:
+        output_dir="{path}/nanoplots/{sample}"
+    conda:
+        "envs/alignment_env.yaml"
+    shell:'''
+        NanoPlot --bam {input.bam} -o {params.output_dir} \
+        --format png --plots dot --loglength
+        '''

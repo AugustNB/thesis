@@ -1,0 +1,24 @@
+[arrangement]
+name = "rear"
+kit = ""
+
+mask1_front = "GGTGCTG"
+mask1_rear = "TTAACCTTAGCAAT"
+
+# Barcode sequences
+barcode1_pattern = "barcode%02i"
+first_index = 1
+last_index = 12
+rear_only_barcodes = true
+
+## Scoring options
+[scoring]
+max_barcode_penalty = 15 # e = ~0.4
+barcode_end_proximity = 96 # length of adapter + mask_front + mask_rear + barcode + 20
+min_barcode_penalty_dist = 4
+min_separation_only_dist = 8
+flank_left_pad = 7 # recommended flank values from docs used
+flank_right_pad = 7 # recommended flank values from docs used
+front_barcode_window = 100 # a little larger than barcode_end_proximity
+rear_barcode_window = 100 # a little larger than barcode_end_proximity
+midstrand_flank_score = 0.85 # equal to e = 0.15

@@ -1,0 +1,185 @@
+import os
+
+configfile: "config/config.yaml"
+
+#BASE_PATH = config["base_path"]
+
+rule all:
+    input:
+        assigned_barcodes=expand("{save_path}/demultiplex_data/dorado{score}_O{O}_E{E}/assigned_barcodes.txt",
+                    save_path=config["save_path"],
+                    score=config["scoring_options"],
+                    O=config["overlap"],
+                    E=config["error_rate"]),
+        entropy_plot=expand("{save_path}/demultiplex_data/dorado{score}_O{O}_E{E}/entropy_dist.png",
+                            save_path=config["save_path"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"]),
+        barcode_plot=expand("{save_path}/demultiplex_data/dorado{score}_O{O}_E{E}/barcode_frac.png",
+                            save_path=config["save_path"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"]),
+        classifications=expand("{save_path}/demultiplex_data/dorado{score}_O{O}_E{E}/classifications.txt",
+                    save_path=config["save_path"],
+                    score=config["scoring_options"],
+                    O=config["overlap"],
+                    E=config["error_rate"]),
+        tool_stats=expand("{save_path}/demultiplex_data/dorado{score}_O{O}_E{E}/tool_stats.txt",
+                    save_path=config["save_path"],
+                    score=config["scoring_options"],
+                    O=config["overlap"],
+                    E=config["error_rate"]),
+        tool_stats_plot=expand("{save_path}/demultiplex_data/dorado{score}_O{O}_E{E}/tool_stats_plot.png",
+                    save_path=config["save_path"],
+                    score=config["scoring_options"],
+                    O=config["overlap"],
+                    E=config["error_rate"]),
+        assigned_barcodes_nounclassified=expand("{save_path}/demultiplex_data/no_unclassified/dorado{score}_O{O}_E{E}/assigned_barcodes.txt",
+                            save_path=config["save_path"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"]),
+        entropy_plot_nounclassified=expand("{save_path}/demultiplex_data/no_unclassified/dorado{score}_O{O}_E{E}/entropy_dist.png",
+                            save_path=config["save_path"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"]),
+        barcode_plot_nounclassified=expand("{save_path}/demultiplex_data/no_unclassified/dorado{score}_O{O}_E{E}/barcode_frac.png",
+                            save_path=config["save_path"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"]),
+        classifications_nounclassified=expand("{save_path}/demultiplex_data/no_unclassified/dorado{score}_O{O}_E{E}/classifications.txt",
+                            save_path=config["save_path"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"])
+
+rule cutadapt:
+    input:
+        fastq=config["input_fastq"],
+        barcodes="resources/custom_arrangements/{location}.fasta"
+    output:
+        "results/dorado{score}_O{O}_E{E}/cutadapt/{location}/{barcode_name}"
+    params:
+        O=config["overlap"],
+        E=config["error_rate"],
+    run:
+        if "front" in wildcards.location:
+            shell_command = '''
+            cutadapt -g file:{input.barcodes} -O {params.O} -e {params.E} \
+            -j 0 --quiet \
+            --action none \
+            --buffer-size=16000000 \
+            -o results/dorado{wildcards.score}_O{wildcards.O}_E{wildcards.E}/cutadapt/{wildcards.location}/{{name}} \
+            {input.fastq}
+            '''
+        else:
+            shell_command = '''
+            cutadapt -a file:{input.barcodes} -O {params.O} -e {params.E} \
+            -j 0 --quiet \
+            --action none \
+            --buffer-size=16000000 \
+            -o results/dorado{wildcards.score}_O{wildcards.O}_E{wildcards.E}/cutadapt/{wildcards.location}/{{name}} \
+            {input.fastq}
+            '''
+        shell(shell_command)
+
+rule dorado_demux:
+    input: 
+        fastq=config["input_fastq"],
+        barcodes="resources/barcodes.fasta",
+        barcodes_reversed="resources/barcodes_rev.fasta"
+    output:
+        "results/dorado{score}_O{O}_E{E}/dorado/{location}/unclassified.fastq"
+    params:
+        score=config["scoring_options"]
+    run:
+        if ("front" in wildcards.location or "double" in wildcards.location):
+            shell_command = '''
+            dorado demux \
+            --barcode-arrangement resources/custom_arrangements/toml_files/{params.score}_{wildcards.location}.toml \
+            --barcode-sequences {input.barcodes} \
+            --emit-fastq \
+            --output-dir results/dorado{wildcards.score}_O{wildcards.O}_E{wildcards.E}/dorado/{wildcards.location} \
+            {input.fastq}
+            '''
+        else:
+            shell_command = '''
+            dorado demux \
+            --barcode-arrangement resources/custom_arrangements/toml_files/{params.score}_{wildcards.location}.toml \
+            --barcode-sequences {input.barcodes_reversed} \
+            --emit-fastq \
+            --output-dir results/dorado{wildcards.score}_O{wildcards.O}_E{wildcards.E}/dorado/{wildcards.location} \
+            {input.fastq}
+            '''
+        shell(shell_command)
+
+rule make_tables:
+    input:
+        cutadapt_input=expand("results/dorado{score}_O{O}_E{E}/cutadapt/{location}/{barcode_name}",
+                                location=config["barcode_locations"],
+                                barcode_name=config["barcode_names"],
+                                score=config["scoring_options"],
+                                O=config["overlap"],
+                                E=config["error_rate"]),
+        dorado_input=expand("results/dorado{score}_O{O}_E{E}/dorado/{location}/unclassified.fastq",
+                            location=config["barcode_locations"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"])
+    output:
+        assigned_barcodes=expand("{save_path}/demultiplex_data/dorado{score}_O{O}_E{E}/assigned_barcodes.txt",
+                    save_path=config["save_path"],
+                    score=config["scoring_options"],
+                    O=config["overlap"],
+                    E=config["error_rate"]),
+        entropy_plot=expand("{save_path}/demultiplex_data/dorado{score}_O{O}_E{E}/entropy_dist.png",
+                            save_path=config["save_path"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"]),
+        barcode_plot=expand("{save_path}/demultiplex_data/dorado{score}_O{O}_E{E}/barcode_frac.png",
+                            save_path=config["save_path"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"]),
+        classifications=expand("{save_path}/demultiplex_data/dorado{score}_O{O}_E{E}/classifications.txt",
+                    save_path=config["save_path"],
+                    score=config["scoring_options"],
+                    O=config["overlap"],
+                    E=config["error_rate"]),
+        tool_stats=expand("{save_path}/demultiplex_data/dorado{score}_O{O}_E{E}/tool_stats.txt",
+                    save_path=config["save_path"],
+                    score=config["scoring_options"],
+                    O=config["overlap"],
+                    E=config["error_rate"]),
+        tool_stats_plot=expand("{save_path}/demultiplex_data/dorado{score}_O{O}_E{E}/tool_stats_plot.png",
+                    save_path=config["save_path"],
+                    score=config["scoring_options"],
+                    O=config["overlap"],
+                    E=config["error_rate"]),
+        assigned_barcodes_nounclassified=expand("{save_path}/demultiplex_data/no_unclassified/dorado{score}_O{O}_E{E}/assigned_barcodes.txt",
+                            save_path=config["save_path"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"]),
+        entropy_plot_nounclassified=expand("{save_path}/demultiplex_data/no_unclassified/dorado{score}_O{O}_E{E}/entropy_dist.png",
+                            save_path=config["save_path"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"]),
+        barcode_plot_nounclassified=expand("{save_path}/demultiplex_data/no_unclassified/dorado{score}_O{O}_E{E}/barcode_frac.png",
+                            save_path=config["save_path"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"]),
+        classifications_nounclassified=expand("{save_path}/demultiplex_data/no_unclassified/dorado{score}_O{O}_E{E}/classifications.txt",
+                            save_path=config["save_path"],
+                            score=config["scoring_options"],
+                            O=config["overlap"],
+                            E=config["error_rate"])
+    script:
+        "make_tables_nounclassified.py"

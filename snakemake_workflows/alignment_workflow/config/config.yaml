@@ -1,0 +1,52 @@
+### GENERAL CONFIGURATIONS
+
+# path to folder containing pod5 files
+path_to_data: "/data/August/speciale_kode/data/RUN5"
+
+# path to samples
+samples:
+    # RUN 1
+    # S1: /data/August/speciale_kode/data/RUN1/trimmed_reads/barcode02.fastq
+    # S10: /data/August/speciale_kode/data/RUN1/trimmed_reads/barcode03.fastq
+    # S11: /data/August/speciale_kode/data/RUN1/trimmed_reads/barcode04.fastq
+    # S20: /data/August/speciale_kode/data/RUN1/trimmed_reads/barcode05.fastq
+    # S21: /data/August/speciale_kode/data/RUN1/trimmed_reads/barcode07.fastq
+    # S22: /data/August/speciale_kode/data/RUN1/trimmed_reads/barcode08.fastq
+    # # RUN 2
+    # S2: /data/August/speciale_kode/data/RUN2/trimmed_reads/barcode11.fastq
+    # S3: /data/August/speciale_kode/data/RUN2/trimmed_reads/barcode10.fastq
+    # S12: /data/August/speciale_kode/data/RUN2/trimmed_reads/barcode04.fastq
+    # S13: /data/August/speciale_kode/data/RUN2/trimmed_reads/barcode03.fastq
+    # S14: /data/August/speciale_kode/data/RUN2/trimmed_reads/barcode02.fastq
+    # S23: /data/August/speciale_kode/data/RUN2/trimmed_reads/barcode08.fastq
+    # S24: /data/August/speciale_kode/data/RUN2/trimmed_reads/barcode07.fastq
+    # S25: /data/August/speciale_kode/data/RUN2/trimmed_reads/barcode05.fastq
+    # # RUN 3
+    # S4: /data/August/speciale_kode/data/RUN3/trimmed_reads/barcode10.fastq
+    # S5: /data/August/speciale_kode/data/RUN3/trimmed_reads/barcode05.fastq
+    # S6: /data/August/speciale_kode/data/RUN3/trimmed_reads/barcode08.fastq
+    # S15: /data/August/speciale_kode/data/RUN3/trimmed_reads/barcode04.fastq
+    # S16: /data/August/speciale_kode/data/RUN3/trimmed_reads/barcode11.fastq
+    # S26: /data/August/speciale_kode/data/RUN3/trimmed_reads/barcode03.fastq
+    # S27: /data/August/speciale_kode/data/RUN3/trimmed_reads/barcode02.fastq
+    # S28: /data/August/speciale_kode/data/RUN3/trimmed_reads/barcode07.fastq
+    # # RUN 4
+    # S7: /data/August/speciale_kode/data/RUN4/trimmed_reads/barcode05.fastq
+    # S8: /data/August/speciale_kode/data/RUN4/trimmed_reads/barcode02.fastq
+    # S9: /data/August/speciale_kode/data/RUN4/trimmed_reads/barcode04.fastq
+    # S17: /data/August/speciale_kode/data/RUN4/trimmed_reads/barcode10.fastq
+    # S18: /data/August/speciale_kode/data/RUN4/trimmed_reads/barcode11.fastq
+    # S19: /data/August/speciale_kode/data/RUN4/trimmed_reads/barcode03.fastq
+    # S29: /data/August/speciale_kode/data/RUN4/trimmed_reads/barcode07.fastq
+    # S30: /data/August/speciale_kode/data/RUN4/trimmed_reads/barcode08.fastq
+    # # RUN 5
+    # S31: /data/August/speciale_kode/data/RUN5/trimmed_reads/barcode05.fastq
+    # S32: /data/August/speciale_kode/data/RUN5/trimmed_reads/barcode11.fastq
+    # S33: /data/August/speciale_kode/data/RUN5/trimmed_reads/barcode04.fastq
+    # S34: /data/August/speciale_kode/data/RUN5/trimmed_reads/barcode10.fastq
+    # S35: /data/August/speciale_kode/data/RUN5/trimmed_reads/barcode07.fastq
+    # S36: /data/August/speciale_kode/data/RUN5/trimmed_reads/barcode03.fastq
+
+
+# reference to align to
+reference: "/data/August/speciale_kode/MS_genes/ms_gene_sequences_mtgenome.mmi"
